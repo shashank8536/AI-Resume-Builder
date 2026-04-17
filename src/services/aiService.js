@@ -1,37 +1,40 @@
 import OpenAI from "openai";
 
-export const generateResumeSummary = async ({ skills, experience, role, projects }) => {
+export const enhanceResumeData = async ({ skills, experience, role, projects }) => {
   try {
     const client = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
+      baseURL: "https://api.groq.com/openai/v1",
+      apiKey: process.env.OPENAI_API_KEY, 
     });
 
     const response = await client.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: "llama-3.1-8b-instant", 
+      response_format: { type: "json_object" },
       messages: [
         {
+          role: "system",
+          content: "You are an expert resume writer. Output ONLY a valid JSON object containing three string keys: 'experience', 'projects', and 'skills'. Take the user's input and enhance it into professional ATS-friendly bullet points using '•' characters. Extremely Important: If the input is already bullet-pointed, just fix typos/grammar WITHOUT duplicating or adding extra information.",
+        },
+        {
           role: "user",
-          content: `
-You are a professional resume writer.
-
-Create a short ATS-friendly resume summary.
-
-Role: ${role}
-Skills: ${skills}
-Experience: ${experience}
-Projects: ${projects}
-
-Make it impactful, concise, and professional.
-          `,
+          content: JSON.stringify({ role, skills, experience, projects }),
         },
       ],
     });
 
-    return response.choices[0].message.content;
+    return JSON.parse(response.choices[0].message.content);
 
   } catch (error) {
     console.log("AI failed, using fallback");
+    
+    // Prevent recursive compounding if the user clicks the button multiple times without an API key
+    const cleanExperience = experience.startsWith('•') ? experience : `• Enhanced role: ${experience}\n• Led robust lifecycle development\n• Highly motivated and results-driven.`;
+    const cleanProjects = projects.startsWith('•') ? projects : `• Enhanced: ${projects}\n• Architected and deployed scalable solutions`;
 
-    return `Professional ${role} with experience in ${skills}. Strong background in ${experience}. Worked on projects like ${projects}. Highly motivated and results-driven.`;
+    return {
+      experience: cleanExperience,
+      projects: cleanProjects,
+      skills: skills
+    };
   }
 };

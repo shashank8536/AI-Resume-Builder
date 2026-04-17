@@ -1,8 +1,8 @@
 import express from "express";
-import { createResumeSummary } from "../controllers/aiController.js";
+import { enhanceResume } from "../controllers/aiController.js";
 
 const router = express.Router();
 
-router.post("/resume-summary", createResumeSummary);
+router.post("/enhance-resume", enhanceResume);
 
 export default router;

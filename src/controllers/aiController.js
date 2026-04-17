@@ -1,6 +1,6 @@
-import { generateResumeSummary } from "../services/aiService.js";
+import { enhanceResumeData } from "../services/aiService.js";
 
-export const createResumeSummary = async (req, res) => {
+export const enhanceResume = async (req, res) => {
   try {
     const { skills, projects, experience, role } = req.body;
 
@@ -10,14 +10,14 @@ export const createResumeSummary = async (req, res) => {
       });
     }
 
-    const summary = await generateResumeSummary({
+    const enhancedData = await enhanceResumeData({
       skills,
       projects,
       experience,
       role,
     });
 
-    res.json({ success: true, summary });
+    res.json({ success: true, ...enhancedData });
 
   } catch (error) {
     res.status(500).json({

@@ -7,7 +7,7 @@ export const signup = async (req, res) => {
   try {
     const { name, email, password } = req.body;
     if(!name||!email||!password){
-      return res.json({message: "All feilds are required"});
+      return res.json({message: "All fields are required"});
     }
 
   
@@ -39,7 +39,7 @@ export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
      if(!email||!password){
-      return res.json({message: "All feilds are required"});
+      return res.json({message: "All fields are required"});
     }
 
     
@@ -55,6 +55,10 @@ export const login = async (req, res) => {
     }
 
   
+    if (!process.env.JWT_SECRET) {
+      return res.status(500).json({ error: 'JWT_SECRET is not configured in the backend environment.' });
+    }
+
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
       expiresIn: "1d",
     });
